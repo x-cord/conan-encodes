@@ -301,7 +301,7 @@ def stretch(clip: vs.VideoNode, width: int) -> vs.VideoNode:
 
 
 flt = stretch(flt, 710)
-conan = stretch(conan, 710)
+conan = stretch(conan, 720)
 
 # less strong deband that won't destroy fine lines
 flt = debandshit.dumb3kdb(flt, 12, 10)

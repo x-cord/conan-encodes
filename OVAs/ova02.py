@@ -127,11 +127,11 @@ flt = flt.resize.Bicubic(format=YUV444P16, matrix_s="170m")
 
 # magic filter
 rgbs = core.resize.Bicubic(flt, format=RGBS, matrix_in_s="170m", range_in_s="limited")
-flt = lvf.deblock.autodb_dpir(rgbs, strs=[10, 14, 18, 24], thrs=[(0.0, 0.0, 0.0), (0.8, 1.2, 1.2), (1.4, 1.8, 1.8), (3.0, 4.5, 4.5)], cuda=False).resize.Bicubic(format=YUV444P16, matrix_s="170m")
+flt = lvf.deblock.autodb_dpir(rgbs, strs=[10, 14, 18, 24], thrs=[(0.0, 0.0, 0.0), (0.8, 1.2, 1.2), (1.4, 1.8, 1.8), (3.0, 4.5, 4.5)], cuda=True).resize.Bicubic(format=YUV444P16, matrix_s="170m")
 
 # stronger deblock around lineart to get rid of more halos
 mask = lvf.mask.detail_mask(flt, brz_a=0.185, brz_b=0.260).std.Maximum()
-strong = DPIR(rgbs, task="deblock", device_type="cpu", strength=45).resize.Bicubic(format=YUV444P16, matrix_s="170m")
+strong = DPIR(rgbs, task="deblock", device_type="cuda", strength=45).resize.Bicubic(format=YUV444P16, matrix_s="170m")
 dpirmin = core.std.MaskedMerge(flt, core.std.Expr([flt, strong], "x y min"), mask)
 flt = core.std.ShufflePlanes([core.std.Expr([flt, dpirmin], "x y min"), flt], planes=[0, 1, 2], colorfamily=YUV)
 

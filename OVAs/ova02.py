@@ -123,7 +123,7 @@ def effortfm(conan: vs.VideoNode) -> vs.VideoNode:
 
     nnedi_conan_vinv = nnedi_conan.vinverse.Vinverse()
 
-    def _masked_qtmgc(frames: vs.VideoNode, mask: vs.VideoNode) -> vs.VideoNode:
+    def _masked_qtmgc(frames: Union[Range, List[Range], None], mask: vs.VideoNode) -> vs.VideoNode:
         replace = core.std.MaskedMerge(fm, qtgmc_vinv, mask, first_plane=True)
 
         return lvf.rfs(fm, replace, frames)
@@ -188,7 +188,7 @@ def effortfm(conan: vs.VideoNode) -> vs.VideoNode:
         if blur_iterations > 0:
             mask = Maximum(mask.std.BoxBlur(hradius=8), 5).std.Binarize(35).std.BoxBlur(hradius=8)
 
-            for _ in blur_iterations:
+            for _ in range(blur_iterations):
                 mask = mask.std.Binarize(5).std.BoxBlur(hradius=blur_hradius).std.Binarize(1).std.BoxBlur(hradius=8)
 
         return lvf.rfs(

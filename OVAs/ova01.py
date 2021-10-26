@@ -45,7 +45,7 @@ def effortfm(conan):
     fm = awf.ReplaceFrames(fm, fm[1:], "38960 38963 38966 21349 21311 5038") # frame +2
     fm = awf.ReplaceFrames(fm, fm[2:], "38959 38962 5037") # frame +3
 
-    return fm
+    return fm.std.SetFieldBased(0)
 
 # mostly pasted from lvsfunc.deinterlace.TIVTC_VFR
 def magicdecimate(fm, tdec_in="tdec_in.txt"):

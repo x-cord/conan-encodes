@@ -6,6 +6,15 @@ import havsfunc as haf
 # didn't bother fixing the logo fadeout at [967 996]
 # still missing the half-frame at 26992, but TDecimate made it seamless (no stutter)
 
+# bad mpeg2 12418
+
+# this section is way too sharp [3944 3999]
+
+# animation errors:
+# [14408 14410] missing line
+
+# need to qtgmc this half-frame 26153
+
 conan = core.lsmas.LWLibavSource("ova02.y4m") # dump of ova02.py output
 
 # fix chroma shift except during credits
@@ -66,5 +75,9 @@ flt = awf.ReplaceFrames(flt, core.std.MaskedMerge(flt, flt[1:], core.std.Expr([k
 
 # residual combing
 flt = awf.ReplaceFrames(flt, haf.Vinverse(haf.Vinverse(flt)), "36300 36301")
+
+# weirdest interlacing artifact I've seen --this probably doesn't have a name
+flt = awf.ReplaceFrames(flt, flt[1:], "52 6435 6463 11996 12002 12042 12138 12281") # freezing to next frame
+flt = awf.ReplaceFrames(flt, flt[0]+flt, "6425 12493 12305") # freezing to previous frame
 
 flt.set_output()

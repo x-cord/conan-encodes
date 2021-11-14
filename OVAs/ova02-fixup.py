@@ -5,13 +5,15 @@ import havsfunc as haf
 import lvsfunc as lvf
 from vsdpir import DPIR
 
-# didn't bother fixing the logo fadeout at [967 996]
+# didn't bother recreating the logo fadeout at [967 996]
 # still missing the half-frame at 26992, but TDecimate made it seamless (no stutter)
 
-# animation errors:
-# [14408 14410] missing line
-
 conan = core.lsmas.LWLibavSource("ova02.y4m") # dump of ova02.py output
+credits = core.lsmas.LWLibavSource("ova02-credits.y4m") # dump of qtgmc'd [35794 35801]
+
+# deinterlaced credits splice
+credits = credits.std.AssumeFPS(conan)
+conan = awf.ReplaceFrames(conan, conan[:35794]+credits, "[35794 35801]")
 
 # splice in forgotten half-frames
 half = core.imwri.Read("fixup/ova02_16301.png").resize.Bicubic(format=YUV444P10, matrix_s="170m", dither_type="error_diffusion").resize.Bicubic(format=YUV444P10, matrix_s="170m", matrix_in_s="709", dither_type="error_diffusion")
@@ -90,5 +92,22 @@ flt = awf.ReplaceFrames(flt, lvf.aa.upscaled_sraa(core.std.Expr([flt, haf.santia
 rgbs = core.resize.Bicubic(flt, format=RGBS, matrix_in_s="709")
 dpir = DPIR(rgbs, task="deblock", device_type="cpu", strength=60).resize.Bicubic(format=YUV444P10, matrix_s="709")
 flt = awf.ReplaceFrames(flt, dpir, "8454 8666 12418")
+
+# blend flickery credits
+def gen_shifts(clip, n, shift, forward=True, backward=True):
+    shifts = [clip]
+    for cur in range(1, n+1):
+        if forward:
+            shifts.append(clip[1*cur:].resize.Bicubic(src_top=-shift*cur)+clip[0]*cur)
+        if backward:
+            shifts.append(clip[0]*cur+clip.resize.Bicubic(src_top=shift*cur)[:-1*cur])
+    return shifts
+
+flt2 = core.std.MaskedMerge(flt, core.average.Mean(gen_shifts(flt, 1, shift=3.85)), kgf.squaremask(flt, width=710, height=540-4*2, offset_x=0, offset_y=4))
+flt2 = core.std.MaskedMerge(flt2, core.average.Mean(gen_shifts(flt, 2, shift=3.85)), kgf.squaremask(flt, width=710, height=540-7*2, offset_x=0, offset_y=7))
+
+flt2 = core.std.MaskedMerge(flt2, flt, kgf.squaremask(flt, width=318, height=256, offset_x=347, offset_y=140).std.BoxBlur(hradius=2, vradius=2))
+
+flt = awf.ReplaceFrames(flt, flt2, "[33715 35799]")
 
 flt.set_output()

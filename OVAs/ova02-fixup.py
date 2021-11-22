@@ -81,6 +81,10 @@ flt = awf.ReplaceFrames(flt, core.std.MaskedMerge(flt, flt[1:], core.std.Expr([k
 # residual combing
 flt = awf.ReplaceFrames(flt, haf.Vinverse(haf.Vinverse(flt)), "36300 36301")
 
+# replace with better frames
+flt = awf.ReplaceFrames(flt, flt[33649]*33694, "33693")
+flt = awf.ReplaceFrames(flt, flt[33653]*33695, "33694")
+
 # weird single-line interlacing artifacts and mpeg2 blocking replacement
 flt = awf.ReplaceFrames(flt, flt[1:], "52 6435 6463 11996 12002 12042 12138 12215 12281") # freezing to next frame
 flt = awf.ReplaceFrames(flt, flt[0]+flt, "6425 12493 12211 12305 21167") # freezing to previous frame

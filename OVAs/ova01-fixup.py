@@ -40,6 +40,20 @@ flt = awf.ReplaceFrames(flt, haf.Deblock_QED(flt, quant1=42, quant2=46), "[5851 
 flt = awf.ReplaceFrames(flt, core.std.MaskedMerge(conan, flt, kgf.squaremask(flt, width=4, height=540, offset_x=flt.width-4, offset_y=0)), "[5851 5853] [9709 9711] 9721 23629 [23651 23659] [23669 23675]")
 flt = awf.ReplaceFrames(flt, core.std.MaskedMerge(conan, flt, kgf.squaremask(flt, width=325, height=240, offset_x=360, offset_y=146)), "32411 32436 33863 33865 33867 [33875 33876] 33878")
 
+# interlacing error
+deint_24447 = core.imwri.Read("fixup/ova01_24447.png").resize.Bicubic(format=YUV444P10, matrix_s="170m", dither_type="error_diffusion").resize.Bicubic(format=YUV444P10, matrix_s="709", matrix_in_s="170m", dither_type="error_diffusion")
+deint_24447 = deint_24447.std.AssumeFPS(flt)
+deint_24447 = deint_24447*24448
+mask_24447 = core.imwri.Read("masks/ova01_24447.png").resize.Bicubic(format=YUV444P10, matrix_s="170m", dither_type="error_diffusion").resize.Bicubic(format=YUV444P10, matrix_s="709", matrix_in_s="170m", dither_type="error_diffusion")
+flt = awf.ReplaceFrames(flt, core.std.MaskedMerge(flt, deint_24447, mask_24447, first_plane=True), "24447")
+
+# heiji shot edges
+edges_27372 = core.imwri.Read("fixup/ova01_27372.png").resize.Bicubic(format=YUV444P10, matrix_s="170m", dither_type="error_diffusion").resize.Bicubic(format=YUV444P10, matrix_s="709", matrix_in_s="170m", dither_type="error_diffusion")
+edges_27372 = edges_27372.std.AssumeFPS(flt)
+edges_27372 = edges_27372*27373
+mask_27372 = core.imwri.Read("masks/ova01_27372.png").resize.Bicubic(format=YUV444P10, matrix_s="170m", dither_type="error_diffusion").resize.Bicubic(format=YUV444P10, matrix_s="709", matrix_in_s="170m", dither_type="error_diffusion")
+flt = awf.ReplaceFrames(flt, awf.bbmod(core.std.MaskedMerge(flt, edges_27372, mask_27372, first_plane=True), left=4, right=8, thresh=10, blur=20), "[27303 27372]")
+
 # terrible hack, anti-aliasing the panning shot
 mask_32096_32145 = core.imwri.Read("masks/ova01_32096_32145.png").resize.Bicubic(format=YUV444P10, matrix_s="170m", dither_type="error_diffusion").resize.Bicubic(format=YUV444P10, matrix_s="170m", matrix_in_s="709", dither_type="error_diffusion")
 flt = awf.ReplaceFrames(flt, core.std.MaskedMerge(flt, lvf.aa.upscaled_sraa(flt, rfactor=1.6), mask_32096_32145, first_plane=True), "[32096 32145]")

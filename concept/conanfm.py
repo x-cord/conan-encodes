@@ -215,7 +215,7 @@ def orphandecimate(clip, tdec_in="tdec_in.txt", error=3):
     return splice
 
 fm = conanfm(conan)
-spliced = orphandecimate(conan, "366-dec.txt")
+spliced = orphandecimate(fm, "366-dec.txt")
 spliced = spliced.std.AssumeFPS(fm) # for vspreview
 
 conan.set_output(0)
